@@ -71,7 +71,11 @@ modules =
     Idris.Driver,
     Idris.Error,
     Idris.ModTree,
+
     Idris.Package,
+    Idris.Package.Init,
+    Idris.Package.Types,
+
     Idris.Parser,
     Idris.Parser.Let,
     Idris.Pretty,
@@ -106,6 +110,7 @@ modules =
     Libraries.Data.DList,
     Libraries.Data.IMaybe,
     Libraries.Data.IntMap,
+    Libraries.Data.IOMatrix,
     Libraries.Data.LengthMatch,
     Libraries.Data.List.Extra,
     Libraries.Data.List.Lazy,
@@ -118,7 +123,10 @@ modules =
     Libraries.Data.StringMap,
     Libraries.Data.StringTrie,
 
+    Libraries.System.Directory.Tree,
+
     Libraries.Text.Bounded,
+    Libraries.Text.Distance.Levenshtein,
     Libraries.Text.Lexer,
     Libraries.Text.Lexer.Core,
     Libraries.Text.Lexer.Tokenizer,
