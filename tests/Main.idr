@@ -83,7 +83,7 @@ idrisTestsInteractive = MkTestPool []
        "interactive017", "interactive018", "interactive019", "interactive020",
        "interactive021", "interactive022", "interactive023", "interactive024",
        "interactive025", "interactive026", "interactive027", "interactive028",
-       "interactive029"]
+       "interactive029", "interactive030"]
 
 idrisTestsInterface : TestPool
 idrisTestsInterface = MkTestPool []
@@ -136,6 +136,11 @@ idrisTestsData = MkTestPool []
        "record001", "record002", "record003", "record004", "record005",
        "record006", "record007"]
 
+idrisTestsBuiltin : TestPool
+idrisTestsBuiltin = MkTestPool []
+      -- %builtin related tests for the frontend (type-checking)
+      ["builtin001", "builtin002", "builtin003", "builtin004"]
+
 idrisTestsEvaluator : TestPool
 idrisTestsEvaluator = MkTestPool []
       [ -- Evaluator
@@ -158,9 +163,10 @@ idrisTests = MkTestPool []
        -- Namespace blocks
        "namespace001",
        -- Parameters blocks
-       "params001",
+       "params001","params002",
        -- Packages and ipkg files
        "pkg001", "pkg002", "pkg003", "pkg004", "pkg005", "pkg006", "pkg007",
+       "pkg008", "pkg009",
        -- Positivity checking
        "positivity001", "positivity002", "positivity003",
        -- Larger programs arising from real usage. Typically things with
@@ -176,7 +182,9 @@ idrisTests = MkTestPool []
        -- The 'with' rule
        "with001", "with002", "with004", "with005",
        -- with-disambiguation
-       "with003"]
+       "with003",
+       -- pretty printing
+       "pretty001"]
 
 typeddTests : TestPool
 typeddTests = MkTestPool []
@@ -259,9 +267,16 @@ baseLibraryTests = MkTestPool [Chez, Node]
   , "system_info001"
   ]
 
+-- same behavior as `baseLibraryTests`
+contribLibraryTests : TestPool
+contribLibraryTests = MkTestPool [Chez, Node]
+  [ "json_001"
+  ]
+
 codegenTests : TestPool
 codegenTests = MkTestPool []
   [ "con001"
+  , "builtin001"
   ]
 
 main : IO ()
@@ -278,12 +293,14 @@ main = runner
   , testPaths "idris2" idrisTestsPerformance
   , testPaths "idris2" idrisTestsRegression
   , testPaths "idris2" idrisTestsData
+  , testPaths "idris2" idrisTestsBuiltin
   , testPaths "idris2" idrisTestsEvaluator
   , testPaths "idris2" idrisTests
   , testPaths "typedd-book" typeddTests
   , testPaths "ideMode" ideModeTests
   , testPaths "prelude" preludeTests
   , testPaths "base" baseLibraryTests
+  , testPaths "contrib" contribLibraryTests
   , testPaths "chez" chezTests
   , testPaths "refc" refcTests
   , testPaths "racket" racketTests

@@ -12,7 +12,7 @@ import System.Path
 ------------------------------------------------------------------------------
 -- Filenames
 
-||| A `Filename root` is  anchored in `root`.
+||| A `Filename root` is anchored in `root`.
 ||| We use a `data` type so that Idris can easily infer `root` when passing
 ||| a `FileName` around. We do not use a `record` because we do not want to
 ||| allow users to manufacture their own `FileName`.
@@ -26,16 +26,21 @@ export
 fileName : FileName root -> String
 fileName (MkFileName str) = str
 
+namespace FileName
+  export
+  toRelative : FileName root -> FileName (parse "")
+  toRelative (MkFileName x) = MkFileName x
+
 ||| Convert a filename anchored in `root` to a filepath by appending the name
 ||| to the root path.
 export
-toFilePath : {root : Path} -> FileName root -> String
-toFilePath file = show (root /> fileName file)
+toFilePath : {root : Path} -> FileName root -> Path
+toFilePath file = root /> fileName file
 
 export
 directoryExists : {root : Path} -> FileName root -> IO Bool
 directoryExists fp = do
-  Right dir <- openDir (toFilePath fp)
+  Right dir <- openDir (show $ toFilePath fp)
     | Left _ => pure False
   closeDir dir
   pure True
@@ -62,6 +67,13 @@ SubTree root = (dir : FileName root ** IO (Tree (root /> fileName dir)))
 export
 emptyTree : Tree root
 emptyTree = MkTree [] []
+
+namespace Tree
+  ||| No run time information is changed,
+  ||| so we assert the identity.
+  export
+  toRelative : Tree root -> Tree (parse "")
+  toRelative x = believe_me x
 
 ||| Filter out files and directories that do not satisfy a given predicate.
 export
@@ -127,6 +139,26 @@ go dir acc = case !(dirEntry dir) of
                 else { files    $= (entry                ::) } acc
     assert_total (go dir acc)
 
+||| Depth first traversal of all of the files in a tree
+export
+covering
+depthFirst : ({root : Path} -> FileName root -> Lazy (IO a) -> IO a) ->
+             {root : Path} -> Tree root -> IO a -> IO a
+depthFirst check t k =
+  let next = foldr (\ (dir ** iot), def => depthFirst check !iot def) k t.subTrees in
+  foldr (\ fn, def => check fn def) next t.files
+
+||| Finding a file in a tree (depth first search)
+export
+covering
+findFile : {root : Path} -> String -> Tree root -> IO (Maybe Path)
+findFile needle t = depthFirst check t (pure Nothing) where
+
+  check : {root : Path} -> FileName root ->
+          Lazy (IO (Maybe Path)) -> IO (Maybe Path)
+  check fn next = if fileName fn == needle
+                    then pure (Just (toFilePath fn))
+                    else next
 
 ||| Display a tree by printing it procedurally. Note that because directory
 ||| trees contain suspended computations corresponding to their subtrees this
